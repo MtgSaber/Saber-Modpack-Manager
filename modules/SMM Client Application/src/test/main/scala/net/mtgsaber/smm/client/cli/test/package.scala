@@ -1,0 +1,8 @@
+package net.mtgsaber.smm.client.cli
+
+/**
+ * Corresponds to all test classes of the CLI form of the Client Application.
+ */
+package object test {
+
+}
