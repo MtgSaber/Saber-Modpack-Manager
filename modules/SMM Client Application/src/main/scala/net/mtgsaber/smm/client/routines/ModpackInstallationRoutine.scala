@@ -1,7 +1,7 @@
 package net.mtgsaber.smm.client.routines
 
 import net.mtgsaber.smm.client.models.{MCInstallationSpec, MCProfile, ModpackInstallation, PackFile}
-import net.mtgsaber.smm.client.routines.ProgressTracking.{HookDictionary, ProgressHook}
+import net.mtgsaber.smm.client.ProgressTracking.{HookDictionary, ProgressHook}
 
 import scala.concurrent.*
 import ExecutionContext.Implicits.global
