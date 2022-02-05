@@ -6,11 +6,15 @@ object ProgressTracking {
   /**
    * Callbacks for handling the start of a task, an update to that task's progress, and the ending of that task.
    */
-  case class ProgressHook(start: String => Unit, progress: (String, Float) => Unit, stop: Try[Unit] => Unit)
+  case class ProgressHook(
+    start: Option[AnyVal] => Unit,
+    progress: (Option[AnyVal], Option[Double]) => Unit,
+    stop: Try[Option[AnyVal]] => Unit
+  )
 
   /**
-   * Used to hold all callbacks for tracking the progress of modpack installation.
-   * Fields will all be tuples of functions.
+   * Used to hold tagged [[ProgressHook]]s. Used as input for many [[routines]]. Tag enumerations
+   * can be found as a member of their corresponding [[routines]].
    */
-  type HookDictionary = Map[String, ProgressHook]
+  type HookDictionary = Map[AnyRef, ProgressHook]
 }

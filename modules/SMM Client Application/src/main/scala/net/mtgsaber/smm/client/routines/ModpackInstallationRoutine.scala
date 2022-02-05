@@ -8,12 +8,14 @@ import ExecutionContext.Implicits.global
 import scala.util.Try
 
 /**
- * Models the entire installation process. This is the entire application logic of a full feature.
+ * Models the entire installation process. This is the entire application logic of the full feature.
+ * TODO: convert all member functions to lazy vals and add tags object.
  */
 object ModpackInstallationRoutine {
   /* TODO: add mutable fields as necessary to facilitate synchronization and inter-process communication.
    *       One such communication is the sequential download of files from CurseForge, which forbids
    *       automated concurrent downloads and imposes a delay between automated requests as per
+   *       https://www.curseforge.com/robots.txt
    */
 
   /**
@@ -23,12 +25,9 @@ object ModpackInstallationRoutine {
    * @param hooks The progress hooks for the installation process.
    * @return a <code>Future</code> which performs the installation process.
    */
-  def apply(
-    packInstallation: ModpackInstallation,
-    mcInstallation: MCInstallationSpec,
-    hooks: HookDictionary
-  ): Future[Unit] = {
-    null
+  def apply(): (ModpackInstallation, MCInstallationSpec, HookDictionary) => Future[Unit] =
+    (packInstallation, mcInstallation, hooks) => {
+      null
   }
 
   // TODO: sugar: add builder-pattern overload functions for apply()
@@ -40,11 +39,9 @@ object ModpackInstallationRoutine {
    * @return A <code>Future</code> which downloads all of the files requested by <code>installation</code>,
    *         some of which may be concurrent within this process.
    */
-  private def downloadFiles(
-    mcInstallation: ModpackInstallation,
-    hooks: HookDictionary
-  ): Future[Unit] = {
-    null
+  private def downloadFiles(): (ModpackInstallation, HookDictionary) => Future[Unit] =
+    (mcInstallation, hooks) => {
+      null
   }
 
   /**
@@ -56,8 +53,9 @@ object ModpackInstallationRoutine {
    * @param hook
    * @return A <code>Future</code> which downloads a file. May or may not be concurrent with other file downloads.
    */
-  private def downloadFile(packFile: PackFile, hook: ProgressHook): Future[Unit] = {
-    null
+  private def downloadFile(): (PackFile, ProgressHook) => Future[Unit] =
+    (packFile, hook) => {
+     null
   }
 
   /**
@@ -65,7 +63,8 @@ object ModpackInstallationRoutine {
    * @param profile The contents of the profile to inject. Must be compatible with the JSON format.
    * @param hooks The progress hooks for the installation process.
    */
-  private def injectMCProfile(profile: MCProfile, hooks: HookDictionary): Unit = {
-
+  private def injectMCProfile(): (MCProfile, HookDictionary) => Unit =
+    (profile, hooks) => {
+      null
   }
 }
