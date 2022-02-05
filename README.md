@@ -204,7 +204,11 @@ the original branching strategies mentioned earlier.
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
 
-Use this space to list resources you find helpful and would like to give credit to. I've included a few of my favorites to kick things off!
+<p>
+Listed are some programs, services, plugins, and projects which either eased the development of this project,
+assisted with my learning, helped me find answers to my questions, helped me to stay organized,
+or inspired me in some way regarding the project.
+</p>
 
 * [Choose an Open Source License](https://choosealicense.com)
 * [Best README Template](https://github.com/othneildrew/Best-README-Template)
