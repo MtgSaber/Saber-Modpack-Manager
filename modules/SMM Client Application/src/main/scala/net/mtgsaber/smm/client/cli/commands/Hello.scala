@@ -8,6 +8,7 @@ import java.util.concurrent.Callable
 /**
  * An example of using PicoCLI framework. TODO: remove before release.
  */
+
 @Command(
   name="hello",
   description = Array("Says hello to the name provided."),
