@@ -1,10 +1,10 @@
 package net.mtgsaber.smm.client.routines
 
 import net.mtgsaber.smm.client.models.{MCInstallationSpec, MCProfile, ModpackInstallation, PackFile}
-import net.mtgsaber.smm.client.ProgressTracking.{HookDictionary, ProgressHook}
+import net.mtgsaber.smm.client.state.ApplicationExecutionContextCategories
+import net.mtgsaber.smm.client.state.Tracking.{HookDictionary, ProgressHook}
 
 import scala.concurrent.*
-import ExecutionContext.Implicits.global
 import scala.util.Try
 
 /**
@@ -43,7 +43,10 @@ object ModpackInstallationRoutine {
     mcInstallation: MCInstallationSpec,
     hooks: HookDictionary
   ): Future[Unit] = {
-    null
+    implicit val ec: ExecutionContext = applicationState.executionContexts.get(ApplicationExecutionContextCategories.RoutineSubtasks)
+    Future {
+
+    }
   }
 
   /**
@@ -57,7 +60,10 @@ object ModpackInstallationRoutine {
     mcInstallation: MCInstallationSpec,
     hooks: HookDictionary
   ): Future[Unit] = {
-      null
+    implicit val ec: ExecutionContext = applicationState.executionContexts.get(ApplicationExecutionContextCategories.RoutineSubtasks)
+    Future {
+
+    }
   }
 
   /**
@@ -70,7 +76,10 @@ object ModpackInstallationRoutine {
    * @return A <code>Future</code> which downloads a file. May or may not be concurrent with other file downloads.
    */
   private def downloadFile(packFile: PackFile, hook: ProgressHook): Future[Unit] = {
-     null
+    implicit val ec: ExecutionContext = applicationState.executionContexts.get(ApplicationExecutionContextCategories.RoutineSubtasks)
+    Future {
+
+    }
   }
 
   /**
@@ -78,7 +87,10 @@ object ModpackInstallationRoutine {
    * @param profile The contents of the profile to inject. Must be compatible with the JSON format.
    * @param hooks The progress hooks for the installation process.
    */
-  private def injectMCProfile(profile: MCProfile, hooks: HookDictionary): Unit = {
-      null
+  private def injectMCProfile(profile: MCProfile, hooks: HookDictionary): Future[Unit] = {
+    implicit val ec: ExecutionContext = applicationState.executionContexts.get(ApplicationExecutionContextCategories.RoutineSubtasks)
+    Future {
+
+    }
   }
 }

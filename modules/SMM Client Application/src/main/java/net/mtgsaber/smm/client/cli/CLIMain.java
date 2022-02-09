@@ -1,6 +1,7 @@
 package net.mtgsaber.smm.client.cli;
 
 import net.mtgsaber.smm.client.cli.commands.Hello;
+import net.mtgsaber.smm.client.cli.commands.Main;
 import picocli.CommandLine;
 
 /**
@@ -8,5 +9,6 @@ import picocli.CommandLine;
  */
 public class CLIMain {
     public static void main(String[] args) {
+        System.exit(Main.main(args));
     }
 }

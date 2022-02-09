@@ -1,8 +1,10 @@
-package net.mtgsaber.smm.client
+package net.mtgsaber.smm.client.state
+
+import net.mtgsaber.smm.client.routines
 
 import scala.util.Try
 
-object ProgressTracking {
+object Tracking {
   /**
    * Callbacks for handling the start of a task, an update to that task's progress, and the ending of that task.
    */

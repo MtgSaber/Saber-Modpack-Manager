@@ -1,5 +1,6 @@
 package net.mtgsaber.smm.client.cli.commands
 
+import net.mtgsaber.smm.client.state.ApplicationState
 import picocli.CommandLine
 import picocli.CommandLine.{Command, Option, Parameters}
 
@@ -17,10 +18,6 @@ class Main extends Callable[Int] {
   @CommandLine.Spec
   private[commands] var spec: CommandLine.Model.CommandSpec = null
 
-  // TODO: add options and annotate them.
-
-  private var isConfigLoaded = false
-
   def call(): Int = {
     // TODO: during GUI development, change this method to code that launches the GUI.
     if spec == null then throw NullPointerException(
@@ -31,17 +28,12 @@ class Main extends Callable[Int] {
       "Until the GUI feature of this software is released, please specify a subcommand or use --help."
     )
   }
-
-  protected[commands] def loadConfig(): Unit = {
-    if !isConfigLoaded then {
-      // TODO: load config
-      isConfigLoaded = true
-    }
-  }
 }
 
 object Main {
   def main(args: Array[String]): Int = {
     CommandLine.call(new Main(), args*)
   }
+
+  val applicationState: ApplicationState = ApplicationState(Map(), ApplicationConfig())
 }

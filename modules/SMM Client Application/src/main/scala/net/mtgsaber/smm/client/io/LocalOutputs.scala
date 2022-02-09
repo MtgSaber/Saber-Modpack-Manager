@@ -1,7 +1,7 @@
 package net.mtgsaber.smm.client.io
 
 import net.mtgsaber.smm.client.models.{MCInstallationSpec, MCProfile}
-import net.mtgsaber.smm.client.ProgressTracking.ProgressHook
+import net.mtgsaber.smm.client.state.Tracking.ProgressHook
 
 import scala.concurrent.Future
 import scala.util.Try
