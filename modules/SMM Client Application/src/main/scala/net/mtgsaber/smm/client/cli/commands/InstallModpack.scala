@@ -3,7 +3,8 @@ package net.mtgsaber.smm.client.cli.commands
 import net.mtgsaber.smm.client.io.RemoteAPI
 import net.mtgsaber.smm.client.state.Tracking.{HookDictionary, ProgressHook}
 import net.mtgsaber.smm.client.io.RemoteAPI.HookPoints as APIHookPoints
-import net.mtgsaber.smm.client.models.Modpack
+import net.mtgsaber.smm.client.models.{Modpack, ModpackInstallation}
+import net.mtgsaber.smm.client.routines.ModpackInstallationRoutine
 import net.mtgsaber.smm.client.routines.ModpackInstallationRoutine.HookPoints as RoutineHookPoints
 import picocli.CommandLine
 import picocli.CommandLine.{Command, Option, Parameters, ParentCommand}
@@ -11,7 +12,8 @@ import picocli.CommandLine.{Command, Option, Parameters, ParentCommand}
 import java.io.File
 import java.nio.file.Path
 import java.net.URI
-import java.util.concurrent.Callable
+import java.util.concurrent.{Callable, TimeUnit}
+import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
 @Command(
@@ -57,14 +59,42 @@ class InstallModpack extends Callable[Int] {
    */
   override def call(): Int = {
     // TODO: implement
-    val version = if modpackVersion == "latest" then
-      RemoteAPI.getPackLatestVersion(Modpack(modpackID), hooks, Main.applicationState)
-    else
-      RemoteAPI.getPackVersions(Modpack(modpackID), hooks, Main.applicationState).filter({
-        // TODO: implement this. also check usage of futures and see if Try[] wrapping is needed or redundant.
-      })
-    // TODO: finish this procedure.
-    0
+    var installationResult = 0
+    val routine = {
+      if modpackVersion == "latest" then
+        RemoteAPI.getPackLatestVersion(Modpack(modpackID), hooks, Main.applicationState)
+      else
+        RemoteAPI.getPackVersions(Modpack(modpackID), hooks, Main.applicationState).filter({
+          // TODO: implement this. also check usage of futures and see if Try[] wrapping is needed or redundant.
+        })
+    }.andThen({
+      case Failure(exception) => {
+        exception match {
+          case _ => {
+            // TODO: handle exceptions. should result in an integer return value.
+          }
+        }
+        // TODO: handle failed API call
+      }
+      case Success(value) => {
+        ModpackInstallationRoutine
+          .apply(ModpackInstallation(installationPath, version))
+          .apply(Main.applicationState.applicationConfig.mcInstallationSpec)
+          .apply(hooks)
+          .andThen({
+            case Failure(exception) => {
+              exception match {
+                case _ => {
+                  // TODO: handle exceptions. should result in an integer return value.
+                }
+              }
+            }
+            case Success(value) => installationResult = value
+          })
+      }
+    })
+    Await.result(routine, Duration(0, TimeUnit.NANOSECONDS))
+    installationResult
   }
 
   /**

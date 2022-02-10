@@ -13,7 +13,7 @@ object LocalInputs {
    * @return A list of the current profiles in the user's Minecraft installation.
    */
   private def readMCProfiles(mcInstallation: MCInstallationSpec): List[MCProfile] = {
-    null
+    null // TODO: implement
   }
 
   /**
@@ -24,13 +24,13 @@ object LocalInputs {
    * @param mcInstallation   Metadata of the user's Minecraft installation. Needed for profiles manipulation.
    * @return The profile if found.
    */
-  private def findExistingProfile(
+  private def getExistingProfile(
     optProfiles: Option[List[MCProfile]] = Option.empty,
     packInstallation: ModpackInstallation,
     mcInstallation: MCInstallationSpec
   ): Option[MCProfile] = {
     val profiles: List[MCProfile] = optProfiles getOrElse readMCProfiles(mcInstallation)
 
-    null
+    null // TODO: implement
   }
 }

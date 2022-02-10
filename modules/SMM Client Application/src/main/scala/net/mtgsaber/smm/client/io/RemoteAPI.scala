@@ -19,31 +19,35 @@ object RemoteAPI
     case getPackBaseProfile
   }
 
-  def getPackList(hookDictionary: HookDictionary, applicationState: ApplicationState): Future[Try[List[Modpack]]] = {
-    implicit val ec: ExecutionContext = applicationState.executionContexts.get(ApplicationExecutionContextCategories.SMMAPICalls)
+  def getPackList(
+    hookDictionary: HookDictionary, applicationState: ApplicationState
+  ): Future[List[Modpack]] = {
     Future {
-      Failure(new NotImplementedError())
-    }
+      throw new NotImplementedError()
+    } (applicationState.executionContexts.get(ApplicationExecutionContextCategories.SMMAPICalls))
   }
 
-  def getPackVersions(modpack: Modpack, hookDictionary: HookDictionary, applicationState: ApplicationState): Future[Try[List[ModpackVersion]]] = {
-    implicit val ec: ExecutionContext = applicationState.executionContexts.get(ApplicationExecutionContextCategories.SMMAPICalls)
+  def getPackVersions(
+    modpack: Modpack, hookDictionary: HookDictionary, applicationState: ApplicationState
+  ): Future[List[ModpackVersion]] = {
     Future {
-      Failure(new NotImplementedError())
-    }
+      throw new NotImplementedError()
+    } (applicationState.executionContexts.get(ApplicationExecutionContextCategories.SMMAPICalls))
   }
 
-  def getPackLatestVersion(modpack: Modpack, hookDictionary: HookDictionary, applicationState: ApplicationState): Future[Try[ModpackVersion]] = {
-    implicit val ec: ExecutionContext = applicationState.executionContexts.get(ApplicationExecutionContextCategories.SMMAPICalls)
+  def getPackLatestVersion(
+    modpack: Modpack, hookDictionary: HookDictionary, applicationState: ApplicationState
+  ): Future[ModpackVersion] = {
     Future {
-      Failure(new NotImplementedError())
-    }
+      throw new NotImplementedError()
+    } (applicationState.executionContexts.get(ApplicationExecutionContextCategories.SMMAPICalls))
   }
 
-  def getPackBaseProfile(modpack: Modpack, hooks: HookDictionary, applicationState: ApplicationState): Future[Try[MCProfile]] = {
-    implicit val ec: ExecutionContext = applicationState.executionContexts.get(ApplicationExecutionContextCategories.SMMAPICalls)
+  def getPackBaseProfile(
+    modpack: Modpack, hooks: HookDictionary, applicationState: ApplicationState
+  ): Future[MCProfile] = {
     Future {
-      Failure(new NotImplementedError())
-    }
+      throw new NotImplementedError()
+    } (applicationState.executionContexts.get(ApplicationExecutionContextCategories.SMMAPICalls))
   }
 }
