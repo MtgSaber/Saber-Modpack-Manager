@@ -1,9 +1,11 @@
 package net.mtgsaber.smm.client.routines
 
+import net.mtgsaber.smm.client.cli.commands.Main.applicationState
 import net.mtgsaber.smm.client.models.{MCInstallationSpec, MCProfile, ModpackInstallation, PackFile}
 import net.mtgsaber.smm.client.state.ApplicationExecutionContextCategories
 import net.mtgsaber.smm.client.state.Tracking.{HookDictionary, ProgressHook}
 
+import scala.None
 import scala.concurrent.*
 import scala.util.Try
 
@@ -43,10 +45,11 @@ object ModpackInstallationRoutine {
     mcInstallation: MCInstallationSpec,
     hooks: HookDictionary
   ): Future[Unit] = {
-    implicit val ec: ExecutionContext = applicationState.executionContexts.get(ApplicationExecutionContextCategories.RoutineSubtasks)
     Future {
+      hooks get HookPoints.apply foreach(_ start None)
 
-    }
+      hooks get HookPoints.apply foreach(_ end None)
+    } (applicationState.executionContexts get ApplicationExecutionContextCategories.RoutineSubtasks)
   }
 
   /**
@@ -60,10 +63,11 @@ object ModpackInstallationRoutine {
     mcInstallation: MCInstallationSpec,
     hooks: HookDictionary
   ): Future[Unit] = {
-    implicit val ec: ExecutionContext = applicationState.executionContexts.get(ApplicationExecutionContextCategories.RoutineSubtasks)
     Future {
+      hooks get HookPoints.downloadFiles foreach(_ start None)
 
-    }
+      hooks get HookPoints.downloadFiles foreach(_ end None)
+    } (applicationState.executionContexts get ApplicationExecutionContextCategories.RoutineSubtasks)
   }
 
   /**
@@ -76,10 +80,11 @@ object ModpackInstallationRoutine {
    * @return A <code>Future</code> which downloads a file. May or may not be concurrent with other file downloads.
    */
   private def downloadFile(packFile: PackFile, hook: ProgressHook): Future[Unit] = {
-    implicit val ec: ExecutionContext = applicationState.executionContexts.get(ApplicationExecutionContextCategories.RoutineSubtasks)
     Future {
+      hook start packFile
 
-    }
+      hook end packFile
+    } (applicationState.executionContexts get ApplicationExecutionContextCategories.RoutineSubtasks)
   }
 
   /**
@@ -88,9 +93,10 @@ object ModpackInstallationRoutine {
    * @param hooks The progress hooks for the installation process.
    */
   private def injectMCProfile(profile: MCProfile, hooks: HookDictionary): Future[Unit] = {
-    implicit val ec: ExecutionContext = applicationState.executionContexts.get(ApplicationExecutionContextCategories.RoutineSubtasks)
     Future {
+      hooks get HookPoints.injectMCProfile foreach(_ start None)
 
-    }
+      hooks get HookPoints.injectMCProfile foreach(_ end None)
+    } (applicationState.executionContexts get ApplicationExecutionContextCategories.RoutineSubtasks)
   }
 }

@@ -1,7 +1,7 @@
 package net.mtgsaber.smm.client.io
 
 import net.mtgsaber.smm.client.state.Tracking.HookDictionary
-import net.mtgsaber.smm.client.models.{MCProfile, Modpack, ModpackVersion}
+import net.mtgsaber.smm.client.models.{MCProfile, Modpack, ModpackVersion, PackFile}
 import net.mtgsaber.smm.client.state.ApplicationState
 import net.mtgsaber.smm.client.state.ApplicationExecutionContextCategories
 
@@ -10,6 +10,7 @@ import scala.util.{Failure, Try}
 
 /**
  * Contains utilities for I/O with the SMM API.
+ * TODO: replace dummy code after API deployment.
  */
 object RemoteAPI 
 {
@@ -23,7 +24,7 @@ object RemoteAPI
     hookDictionary: HookDictionary, applicationState: ApplicationState
   ): Future[List[Modpack]] = {
     Future {
-      throw new NotImplementedError()
+      List(Modpack("test-pack"))
     } (applicationState.executionContexts.get(ApplicationExecutionContextCategories.SMMAPICalls))
   }
 
@@ -31,7 +32,12 @@ object RemoteAPI
     modpack: Modpack, hookDictionary: HookDictionary, applicationState: ApplicationState
   ): Future[List[ModpackVersion]] = {
     Future {
-      throw new NotImplementedError()
+      List(ModpackVersion(Modpack("test-pack"), "v0.0.1", "test-forge-version",
+        Map(
+          Mod("jei") -> PackFile("https://www.curseforge.com/minecraft/mc-mods/jei/download/3599262", "./tmp/mods/jei")
+        ),
+        Map(), List(), 4096
+      ))
     } (applicationState.executionContexts.get(ApplicationExecutionContextCategories.SMMAPICalls))
   }
 
@@ -39,7 +45,12 @@ object RemoteAPI
     modpack: Modpack, hookDictionary: HookDictionary, applicationState: ApplicationState
   ): Future[ModpackVersion] = {
     Future {
-      throw new NotImplementedError()
+      ModpackVersion(modpack, "v0.0.1", "test-forge-version",
+        Map(
+          Mod("jei") -> PackFile("https://www.curseforge.com/minecraft/mc-mods/jei/download/3599262", "./tmp/mods/jei")
+        ),
+        Map(), List(), 4096
+      )
     } (applicationState.executionContexts.get(ApplicationExecutionContextCategories.SMMAPICalls))
   }
 

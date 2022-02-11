@@ -6,6 +6,7 @@ import net.mtgsaber.smm.client.io.RemoteAPI.HookPoints as APIHookPoints
 import net.mtgsaber.smm.client.models.{Modpack, ModpackInstallation}
 import net.mtgsaber.smm.client.routines.ModpackInstallationRoutine
 import net.mtgsaber.smm.client.routines.ModpackInstallationRoutine.HookPoints as RoutineHookPoints
+import org.tinylog.Logger
 import picocli.CommandLine
 import picocli.CommandLine.{Command, Option, Parameters, ParentCommand}
 
@@ -59,7 +60,7 @@ class InstallModpack extends Callable[Int] {
    */
   override def call(): Int = {
     // TODO: implement
-    var installationResult = 0
+    @volatile var installationResult = 0
     val routine = {
       if modpackVersion == "latest" then
         RemoteAPI.getPackLatestVersion(Modpack(modpackID), hooks, Main.applicationState)
@@ -104,49 +105,49 @@ class InstallModpack extends Callable[Int] {
   private val hooks: HookDictionary = Map(
     RoutineHookPoints.apply -> ProgressHook(
       start = _ => {
-
+        Logger.info("Beginning installation routine...")
       },
       progress = (_, _) => {
 
       },
       stop = _ => {
-
+        Logger.info("Installation routine complete.")
       }
     ),
 
     RoutineHookPoints.downloadFiles -> ProgressHook(
       start = _ => {
-
+        Logger.info("Installation routine: Beginning files download process....")
       },
       progress = (_, _) => {
 
       },
       stop = _ => {
-
+        Logger.info("Installation routine: File downloads complete.")
       }
     ),
 
     RoutineHookPoints.downloadFile -> ProgressHook(
       start = _ => {
-
+        Logger.info("Installation routine: Begin download \"" + _ + "\"...")
       },
       progress = (_, _) => {
 
       },
       stop = _ => {
-
+        Logger.info("Installation routine: End download \"" + _ + "\"")
       }
     ),
 
     RoutineHookPoints.injectMCProfile -> ProgressHook(
       start = _ => {
-
+        Logger.info("Installation routine: Beginning profile injection...")
       },
       progress = (_, _) => {
 
       },
       stop = _ => {
-
+        Logger.info("Installation routine: Profile injection complete.")
       }
     ),
 
