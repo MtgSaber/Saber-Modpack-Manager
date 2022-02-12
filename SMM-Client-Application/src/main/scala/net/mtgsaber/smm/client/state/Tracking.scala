@@ -8,15 +8,9 @@ object Tracking {
   /**
    * Callbacks for handling the start of a task, an update to that task's progress, and the ending of that task.
    */
-  case class ProgressHook(
-    start: Option[AnyVal] => Unit,
-    progress: (Option[AnyVal], Option[Double]) => Unit,
-    stop: Try[Option[AnyVal]] => Unit
+  case class ProgressHook[Start, Progress, Stop](
+    start: Option[Start] => Unit,
+    progress: (Option[Progress], Option[Double]) => Unit,
+    stop: Try[Option[Stop]] => Unit
   )
-
-  /**
-   * Used to hold tagged [[ProgressHook]]s. Used as input for many [[routines]]. Tag enumerations
-   * can be found as a member of their corresponding [[routines]].
-   */
-  type HookDictionary = Map[AnyRef, ProgressHook]
 }

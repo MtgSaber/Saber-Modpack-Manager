@@ -1,14 +1,12 @@
 package net.mtgsaber.smm.client.cli.commands
 
 import net.mtgsaber.smm.client.io.RemoteAPI
-import net.mtgsaber.smm.client.state.Tracking.{HookDictionary, ProgressHook}
-import net.mtgsaber.smm.client.io.RemoteAPI.HookPoints as APIHookPoints
-import net.mtgsaber.smm.client.models.{Modpack, ModpackInstallation}
+import net.mtgsaber.smm.client.state.Tracking.ProgressHook
+import net.mtgsaber.smm.client.models.{Modpack, ModpackInstallation, ModpackVersion, PackFile}
 import net.mtgsaber.smm.client.routines.ModpackInstallationRoutine
-import net.mtgsaber.smm.client.routines.ModpackInstallationRoutine.HookPoints as RoutineHookPoints
 import org.tinylog.Logger
 import picocli.CommandLine
-import picocli.CommandLine.{Command, Option, Parameters, ParentCommand}
+import picocli.CommandLine.{Parameters, ParentCommand, Command as CLICommand, Option as CLIOption}
 
 import java.io.File
 import java.nio.file.Path
@@ -16,175 +14,199 @@ import java.net.URI
 import java.util.concurrent.{Callable, TimeUnit}
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
+import scala.util.Try
 
-@Command(
-  name = "install",
-  description = Array("Installs the specified modpack."),
-  mixinStandardHelpOptions = true
-)
-class InstallModpack extends Callable[Int] {
-  @ParentCommand
-  private var parent: Main = null
+// TODO: when optimizing this for concurrency, remove global context and define a proper execution context
+import concurrent.ExecutionContext.Implicits.global
+import scala.util.{Failure, Success}
 
-  @Option(
-    names = Array("--pack-id"),
-    description = Array("The ID of the modpack to install. For a table of modpack IDs, visit the SMM website or check the discord!"),
-    required = true
+object InstallModpack {
+  @CLICommand(
+    name = "install",
+    description = Array("Installs the specified modpack."),
+    mixinStandardHelpOptions = true
   )
-  private var modpackID: String = null
+  class Command extends Callable[Int] {
+    @ParentCommand
+    private var parent: Main = null
 
-  @Option(
-    names = Array("--pack-version"),
-    description = Array("A specific version of the desired modpack. Usually best to just use the latest."),
-    defaultValue = "latest",
-    hidden = true
-  )
-  private var modpackVersion: String = null
+    @Parameters(
+      index = "0",
+      description = Array("The ID of the modpack to install. For a table of modpack IDs, visit the SMM website or check the discord!"),
+    )
+    private var modpackID: String = null
 
-  @Option(
-    names = Array("--memory-mb", "--memory", "--ram", "--ram-mb", "--alloc", "--allocate"),
-    description = Array("The amount of memory (RAM) to allocate to instances of this modpack installation."),
-    defaultValue = "2048"
-  )
-  private var memoryAllocationMB: Short = 2048
+    @CLIOption(
+      names = Array("--pack-version", "--version"),
+      description = Array("A specific version of the desired modpack. Usually best to just use the latest."),
+      defaultValue = "latest",
+      hidden = true
+    )
+    private var modpackVersionID: String = null
 
-  @Option(
-    names = Array("--path"),
-    description = Array("The directory (folder) to use as the installation root for this modpack. Root directories are usually empty before installation."),
-    defaultValue = "./"
-  )
-  private var installationPath: Path = null
+    @CLIOption(
+      names = Array("--memory-mb", "--memory", "--ram", "--ram-mb", "--alloc", "--allocate"),
+      description = Array("The amount of memory (RAM) to allocate to instances of this modpack installation."),
+      defaultValue = "2048"
+    )
+    private var memoryAllocationMB: Short = 2048
 
-  /**
-   * Performs the modpack installation process and returns its exit code.
-   */
-  override def call(): Int = {
-    // TODO: implement
-    @volatile var installationResult = 0
-    val routine = {
-      if modpackVersion == "latest" then
-        RemoteAPI.getPackLatestVersion(Modpack(modpackID), hooks, Main.applicationState)
-      else
-        RemoteAPI.getPackVersions(Modpack(modpackID), hooks, Main.applicationState).filter({
-          // TODO: implement this. also check usage of futures and see if Try[] wrapping is needed or redundant.
-        })
-    }.andThen({
-      case Failure(exception) => {
-        exception match {
-          case _ => {
-            // TODO: handle exceptions. should result in an integer return value.
-          }
+    @CLIOption(
+      names = Array("--path"),
+      description = Array("The directory (folder) to use as the installation root for this modpack. Root directories are usually empty before installation."),
+      defaultValue = "./"
+    )
+    private var installationPath: Path = null
+
+    /**
+     * Performs the modpack installation process and returns its exit code.
+     */
+    override def call(): Int = {
+      // TODO: implement
+      val routine: Future[Int] = Future[ModpackVersion] {
+        if modpackVersionID == "latest" then
+          RemoteAPI.getPackLatestVersion(
+            Modpack(modpackID), ProgressHooks.APIHooks.getPackLatestVersion, Main.applicationState
+          )
+        else
+          RemoteAPI.getPackVersions(
+            Modpack(modpackID), ProgressHooks.APIHooks.getPackVersions, Main.applicationState
+          ).filter({
+            // TODO: implement this. also check usage of futures and see if Try[] wrapping is needed or redundant.
+            _.versionID == modpackVersionID
+          }).head
+      } map {
+        version => {
+          val minecraftInstallationSpec = Main.applicationState.applicationConfig.mcInstallationSpec
+          val modpackInstallation = ModpackInstallation(installationPath, version)
+          ModpackInstallationRoutine(
+            minecraftInstallationSpec, modpackInstallation, ProgressHooks.routineHooks
+          ).start()
         }
-        // TODO: handle failed API call
+      } map {
+        _ => 0 // TODO: fix this to handle exceptions
       }
-      case Success(value) => {
-        ModpackInstallationRoutine
-          .apply(ModpackInstallation(installationPath, version))
-          .apply(Main.applicationState.applicationConfig.mcInstallationSpec)
-          .apply(hooks)
-          .andThen({
-            case Failure(exception) => {
-              exception match {
-                case _ => {
-                  // TODO: handle exceptions. should result in an integer return value.
-                }
-              }
-            }
-            case Success(value) => installationResult = value
-          })
-      }
-    })
-    Await.result(routine, Duration(0, TimeUnit.NANOSECONDS))
-    installationResult
+      Await.result(routine, Duration(0, TimeUnit.NANOSECONDS))
+    }
   }
 
-  /**
-   * Progress tracking hooks for this command. These tuples of functions are used to constantly inform the user
-   * of the state of the application.
-   */
-  private val hooks: HookDictionary = Map(
-    RoutineHookPoints.apply -> ProgressHook(
-      start = _ => {
-        Logger.info("Beginning installation routine...")
-      },
-      progress = (_, _) => {
+  object ProgressHooks {
+    val routineHooks: ModpackInstallationRoutine.ProgressHookDefinition = ModpackInstallationRoutine.ProgressHookDefinition(
+      start = ProgressHook[String, String, String](
+        start = _ => {
+          Logger.info("%s", "Beginning installation routine...")
+        },
+        progress = (_, _) => {
 
-      },
-      stop = _ => {
-        Logger.info("Installation routine complete.")
-      }
-    ),
+        },
+        stop = _ => {
+          Logger.info("%s", "Installation routine complete.")
+        }
+      ),
 
-    RoutineHookPoints.downloadFiles -> ProgressHook(
-      start = _ => {
-        Logger.info("Installation routine: Beginning files download process....")
-      },
-      progress = (_, _) => {
+      downloadFiles = ProgressHook[Set[PackFile], PackFile, Set[PackFile]](
+        start = _ => {
+          Logger.info("%s", "Installation routine: Beginning files download process....")
+        },
+        progress = (_, _) => {
 
-      },
-      stop = _ => {
-        Logger.info("Installation routine: File downloads complete.")
-      }
-    ),
+        },
+        stop = _ => {
+          Logger.info("%s", "Installation routine: File downloads complete.")
+        }
+      ),
 
-    RoutineHookPoints.downloadFile -> ProgressHook(
-      start = _ => {
-        Logger.info("Installation routine: Begin download \"" + _ + "\"...")
-      },
-      progress = (_, _) => {
+      downloadFile = ProgressHook[PackFile, PackFile, PackFile](
+        start = (packFile: Option[PackFile]) => {
+          Logger.info(
+            "%s", "Installation routine: Begin download \"" + (
+              packFile match {
+                case Some(packFile) => packFile.toString
+                case None => ""
+              }
+            ) + "\"..."
+          )
+        },
+        progress = (_, _) => {
 
-      },
-      stop = _ => {
-        Logger.info("Installation routine: End download \"" + _ + "\"")
-      }
-    ),
+        },
+        stop = (result: Try[Option[PackFile]]) => {
+          result match {
+            case Success(value) => {
+              Logger.info(
+                "%s", "Installation routine: End download \"" + (
+                  value match {
+                    case Some(packFile) => packFile.toString
+                    case None => ""
+                  }
+                  ) + "\""
+              )
+            }
+          }
+        }
+      ),
 
-    RoutineHookPoints.injectMCProfile -> ProgressHook(
-      start = _ => {
-        Logger.info("Installation routine: Beginning profile injection...")
-      },
-      progress = (_, _) => {
+      injectMCProfile = ProgressHook[String, String, String](
+        start = _ => {
+          Logger.info("%s", "Installation routine: Beginning profile injection...")
+        },
+        progress = (_, _) => {
 
-      },
-      stop = _ => {
-        Logger.info("Installation routine: Profile injection complete.")
-      }
-    ),
+        },
+        stop = _ => {
+          Logger.info("%s", "Installation routine: Profile injection complete.")
+        }
+      )
+    )
 
-    APIHookPoints.getPackList -> ProgressHook(
-      start = _ => {
+    object APIHooks {
+      val getPackLatestVersion: ProgressHook[URI, URI, URI] = ProgressHook(
+        start = _ => {
 
-      },
-      progress = (_, _) => {
+        },
+        progress = (_, _) => {
 
-      },
-      stop = _ => {
+        },
+        stop = _ => {
 
-      }
-    ),
+        }
+      )
 
-    APIHookPoints.getPackVersions -> ProgressHook(
-      start = _ => {
+      val getPackList: ProgressHook[URI, URI, URI] = ProgressHook(
+        start = _ => {
 
-      },
-      progress = (_, _) => {
+        },
+        progress = (_, _) => {
 
-      },
-      stop = _ => {
+        },
+        stop = _ => {
 
-      }
-    ),
+        }
+      )
 
-    APIHookPoints.getPackBaseProfile -> ProgressHook(
-      start = _ => {
+      val getPackVersions: ProgressHook[URI, URI, URI] = ProgressHook(
+        start = _ => {
 
-      },
-      progress = (_, _) => {
+        },
+        progress = (_, _) => {
 
-      },
-      stop = _ => {
+        },
+        stop = _ => {
 
-      }
-    ),
-  )
+        }
+      )
+
+      val getPackBaseProfile: ProgressHook[URI, URI, URI] = ProgressHook(
+        start = _ => {
+
+        },
+        progress = (_, _) => {
+
+        },
+        stop = _ => {
+
+        }
+      )
+    }
+  }
 }

@@ -1,6 +1,6 @@
 package net.mtgsaber.smm.client.cli.commands
 
-import net.mtgsaber.smm.client.state.ApplicationState
+import net.mtgsaber.smm.client.state.{ApplicationConfig, ApplicationState}
 import picocli.CommandLine
 import picocli.CommandLine.{Command, Option, Parameters}
 
@@ -9,7 +9,7 @@ import java.util.concurrent.Callable
 @Command(
   name="smm",
   subcommands = Array(
-    classOf[InstallModpack],
+    classOf[InstallModpack.Command],
   ),
   description = Array("The root command of the Saber Modpack Manager. Should be followed by a subcommand."),
   mixinStandardHelpOptions = true,

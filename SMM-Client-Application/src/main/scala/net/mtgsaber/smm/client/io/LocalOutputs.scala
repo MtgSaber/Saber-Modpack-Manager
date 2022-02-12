@@ -23,7 +23,7 @@ object LocalOutputs {
   private def writeMCProfiles(
     mcInstallation: MCInstallationSpec,
     profiles: List[MCProfile],
-    hook: ProgressHook
+    hook: ProgressHook[String, String, String]
   ): Future[Try[Unit]] = {
     null
   }

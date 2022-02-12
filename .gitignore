@@ -53,6 +53,7 @@ dkms.conf
 
 # Compiled class file
 *.class
+*.tasty
 
 # Log file
 *.log
@@ -155,3 +156,6 @@ fabric.properties
 
 # other
 *.docx#
+
+# maven build outputs
+./SMM-Client-Application/target
