@@ -14,7 +14,7 @@ import java.util.concurrent.Callable
   description = Array("The root command of the Saber Modpack Manager. Should be followed by a subcommand."),
   mixinStandardHelpOptions = true,
 )
-class Main extends Callable[Int] {
+class CLIMain extends Callable[Int] {
   @CommandLine.Spec
   private[commands] var spec: CommandLine.Model.CommandSpec = null
 
@@ -30,10 +30,9 @@ class Main extends Callable[Int] {
   }
 }
 
-object Main {
+object CLIMain {
   def main(args: Array[String]): Int = {
-    CommandLine.call(new Main(), args*)
+    val commandLine: CommandLine = new CommandLine(new CLIMain())
+    commandLine.execute(args*)
   }
-
-  val applicationState: ApplicationState = ApplicationState(Map(), ApplicationConfig())
 }

@@ -5,9 +5,9 @@ import net.mtgsaber.smm.client.models.MCInstallationSpec
 /**
  * Mutable container for all app-wide configurations. This is usually loaded from the application's config.yaml.
  */
-class ApplicationConfig {
-  var mcInstallationSpec: MCInstallationSpec = null
-}
+case class ApplicationConfig(
+  mcInstallationSpec: MCInstallationSpec
+)
 
 object ApplicationConfig {
   def apply(): ApplicationConfig = {

@@ -6,3 +6,7 @@ case class ApplicationState(
   executionContexts: Map[ApplicationExecutionContextCategories, ExecutionContext],
   applicationConfig: ApplicationConfig
 )
+
+object ApplicationState {
+  @volatile var get: ApplicationState = ApplicationState(Map(), ApplicationConfig())
+}

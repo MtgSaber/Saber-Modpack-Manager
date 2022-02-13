@@ -4,6 +4,7 @@ import net.mtgsaber.smm.client.io.RemoteAPI
 import net.mtgsaber.smm.client.state.Tracking.ProgressHook
 import net.mtgsaber.smm.client.models.{Modpack, ModpackInstallation, ModpackVersion, PackFile}
 import net.mtgsaber.smm.client.routines.ModpackInstallationRoutine
+import net.mtgsaber.smm.client.state.ApplicationState
 import org.tinylog.Logger
 import picocli.CommandLine
 import picocli.CommandLine.{Parameters, ParentCommand, Command as CLICommand, Option as CLIOption}
@@ -28,7 +29,7 @@ object InstallModpack {
   )
   class Command extends Callable[Int] {
     @ParentCommand
-    private var parent: Main = null
+    private var parent: CLIMain = null
 
     @Parameters(
       index = "0",
@@ -66,18 +67,18 @@ object InstallModpack {
       val routine: Future[Int] = Future[ModpackVersion] {
         if modpackVersionID == "latest" then
           RemoteAPI.getPackLatestVersion(
-            Modpack(modpackID), ProgressHooks.APIHooks.getPackLatestVersion, Main.applicationState
+            Modpack(modpackID), ProgressHooks.APIHooks.getPackLatestVersion, ApplicationState.get
           )
         else
           RemoteAPI.getPackVersions(
-            Modpack(modpackID), ProgressHooks.APIHooks.getPackVersions, Main.applicationState
+            Modpack(modpackID), ProgressHooks.APIHooks.getPackVersions, ApplicationState.get
           ).filter({
             // TODO: implement this. also check usage of futures and see if Try[] wrapping is needed or redundant.
             _.versionID == modpackVersionID
           }).head
       } map {
         version => {
-          val minecraftInstallationSpec = Main.applicationState.applicationConfig.mcInstallationSpec
+          val minecraftInstallationSpec = ApplicationState.get.applicationConfig.mcInstallationSpec
           val modpackInstallation = ModpackInstallation(installationPath, version)
           ModpackInstallationRoutine(
             minecraftInstallationSpec, modpackInstallation, ProgressHooks.routineHooks

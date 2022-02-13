@@ -1,6 +1,6 @@
 package net.mtgsaber.smm.client.routines
 
-import net.mtgsaber.smm.client.cli.commands.Main.applicationState
+import net.mtgsaber.smm.client.cli.commands.CLIMain.applicationState
 import net.mtgsaber.smm.client.models.{MCInstallationSpec, MCProfile, ModpackInstallation, PackFile}
 import net.mtgsaber.smm.client.routines.ModpackInstallationRoutine.ProgressHookDefinition
 import net.mtgsaber.smm.client.state.ApplicationExecutionContextCategories
