@@ -5,6 +5,6 @@ package net.mtgsaber.smm.client.models
  */
 case class ModpackVersion(
   modpack: Modpack, versionID: String, forgeVersion: String,
-  modFiles: Map[Mod, PackFile], configFiles: Map[Mod, PackFile],
+  modFiles: Map[PackFile, Mod], configFiles: Map[PackFile, Mod],
   otherFiles: List[PackFile], recommendedMemAllocMB: Int
 )

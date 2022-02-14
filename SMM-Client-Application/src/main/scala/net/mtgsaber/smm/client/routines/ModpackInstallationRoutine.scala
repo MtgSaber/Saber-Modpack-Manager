@@ -1,11 +1,12 @@
 package net.mtgsaber.smm.client.routines
 
 import net.mtgsaber.smm.client.cli.commands.CLIMain.applicationState
-import net.mtgsaber.smm.client.models.{MCInstallationSpec, MCProfile, ModpackInstallation, PackFile}
+import net.mtgsaber.smm.client.models.{MCInstallationSpec, MCProfile, ModpackInstallation, PackFile, Mod}
 import net.mtgsaber.smm.client.routines.ModpackInstallationRoutine.ProgressHookDefinition
 import net.mtgsaber.smm.client.state.ApplicationExecutionContextCategories
 import net.mtgsaber.smm.client.state.Tracking.ProgressHook
 
+import java.nio.file.Files
 import scala.None
 import scala.concurrent.*
 import scala.util.{Success, Try}
@@ -16,7 +17,9 @@ object ModpackInstallationRoutine {
    */
   case class ProgressHookDefinition(
     start: ProgressHook[String, String, String],
-    downloadFiles: ProgressHook[Set[PackFile], PackFile, Set[PackFile]],
+    downloadMods: ProgressHook[Int, (PackFile, Mod), Int],
+    downloadConfigs: ProgressHook[Int, (PackFile, Mod, Int), Int],
+    downloadOthers: ProgressHook[Int, PackFile, Int],
     downloadFile: ProgressHook[PackFile, PackFile, PackFile],
     injectMCProfile: ProgressHook[String, String, String]
   )
@@ -46,16 +49,51 @@ case class ModpackInstallationRoutine(
   def start(): Unit = {
     hooks.start start None
 
+    Files.createDirectories(packInstallation.root)
+    downloadMods()
+    downloadConfigs()
+    downloadOthers()
+    injectMCProfile()
+
     hooks.start stop Success(None)
   }
 
   /**
-   * Downloads all files for the pack.
+   * Downloads all mods for the pack.
    */
-  private def downloadFiles(): Unit = {
-    hooks.downloadFiles start None
+  private def downloadMods(): Unit = {
+    hooks.downloadMods start packInstallation.modpackVersion.modFiles.size
 
-    hooks.downloadFiles stop Success(None)
+    packInstallation.modpackVersion.modFiles foreach((file, mod) => {
+      hooks.downloadMods progress (Some (file, mod), None)
+      this downloadFile file
+    })
+
+    hooks.downloadMods stop Success(packInstallation.modpackVersion.modFiles.size)
+  }
+
+  /**
+   * Downloads all config files for the pack.
+   */
+  private def downloadConfigs(): Unit = {
+    hooks.downloadConfigs start packInstallation.modpackVersion.configFiles.size
+
+    // TODO: group map of config files to count number of configs for each mod.
+    // TODO: use result of grouping in closure below.
+
+    packInstallation.modpackVersion.configFiles foreach((file, mod) => {
+      hooks.downloadConfigs progress (Some((file, mod, 1)), None)
+      this downloadFile file
+    })
+
+    hooks.downloadConfigs stop Success(packInstallation.modpackVersion.configFiles.size)
+  }
+
+  /**
+   * Downloads all miscellaneous files for the pack.
+   */
+  private def downloadOthers(): Unit = {
+
   }
 
   /**
@@ -68,14 +106,15 @@ case class ModpackInstallationRoutine(
   private def downloadFile(packFile: PackFile): Unit = {
     hooks.downloadFile start Some(packFile)
 
+    // TODO: resolve file path against root path before downloading!
+
     hooks.downloadFile stop Success(Some(packFile))
   }
 
   /**
    * Adds the profile for this pack into the user's Minecraft Profiles file.
-   * @param profile The contents of the profile to inject. Must be compatible with the JSON format.
    */
-  private def injectMCProfile(profile: MCProfile): Unit = {
+  private def injectMCProfile(): Unit = {
     hooks.injectMCProfile start None
 
     hooks.injectMCProfile stop Success(None)
