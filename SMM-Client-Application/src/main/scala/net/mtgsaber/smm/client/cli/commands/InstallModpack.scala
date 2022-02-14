@@ -85,9 +85,15 @@ object InstallModpack {
           ).start()
         }
       } map {
-        _ => 0 // TODO: fix this to handle exceptions
+        _ => 0
+      } recover {
+        _ => {
+          Logger.info(() => "Exception caught!")
+          -1
+        } // TODO: map exceptions to exit codes
       }
-      Await.result(routine, Duration(0, TimeUnit.NANOSECONDS))
+
+      Await.result(routine, Duration(30, TimeUnit.SECONDS))
     }
   }
 
@@ -95,32 +101,32 @@ object InstallModpack {
     val routineHooks: ModpackInstallationRoutine.ProgressHookDefinition = ModpackInstallationRoutine.ProgressHookDefinition(
       start = ProgressHook[String, String, String](
         start = _ => {
-          Logger.info("%s", "Beginning installation routine...")
+          Logger.info(() => "Beginning installation routine...")
         },
         progress = (_, _) => {
 
         },
         stop = _ => {
-          Logger.info("%s", "Installation routine complete.")
+          Logger.info(() => "Installation routine complete.")
         }
       ),
 
       downloadFiles = ProgressHook[Set[PackFile], PackFile, Set[PackFile]](
         start = _ => {
-          Logger.info("%s", "Installation routine: Beginning files download process....")
+          Logger.info(() => "Installation routine: Beginning files download process....")
         },
         progress = (_, _) => {
 
         },
         stop = _ => {
-          Logger.info("%s", "Installation routine: File downloads complete.")
+          Logger.info(() => "Installation routine: File downloads complete.")
         }
       ),
 
       downloadFile = ProgressHook[PackFile, PackFile, PackFile](
         start = (packFile: Option[PackFile]) => {
           Logger.info(
-            "%s", "Installation routine: Begin download \"" + (
+            () => "Installation routine: Begin download \"" + (
               packFile match {
                 case Some(packFile) => packFile.toString
                 case None => ""
@@ -135,7 +141,7 @@ object InstallModpack {
           result match {
             case Success(value) => {
               Logger.info(
-                "%s", "Installation routine: End download \"" + (
+                () => "Installation routine: End download \"" + (
                   value match {
                     case Some(packFile) => packFile.toString
                     case None => ""
@@ -149,13 +155,13 @@ object InstallModpack {
 
       injectMCProfile = ProgressHook[String, String, String](
         start = _ => {
-          Logger.info("%s", "Installation routine: Beginning profile injection...")
+          Logger.info(() => "Installation routine: Beginning profile injection...")
         },
         progress = (_, _) => {
 
         },
         stop = _ => {
-          Logger.info("%s", "Installation routine: Profile injection complete.")
+          Logger.info(() => "Installation routine: Profile injection complete.")
         }
       )
     )

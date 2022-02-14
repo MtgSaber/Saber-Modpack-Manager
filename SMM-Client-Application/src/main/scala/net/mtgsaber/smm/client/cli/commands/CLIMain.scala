@@ -1,6 +1,8 @@
 package net.mtgsaber.smm.client.cli.commands
 
 import net.mtgsaber.smm.client.state.{ApplicationConfig, ApplicationState}
+import net.mtgsaber.smm.client.util.Temporal
+import org.tinylog.configuration.Configuration
 import picocli.CommandLine
 import picocli.CommandLine.{Command, Option, Parameters}
 
@@ -32,6 +34,9 @@ class CLIMain extends Callable[Int] {
 
 object CLIMain {
   def main(args: Array[String]): Int = {
+    Configuration.set("writer", "file")
+    Configuration.set("writer.file", "./SMM-Client-Application/tmp/logs/TestRun_[" + Temporal.timestamp() + "].log")
+    Configuration.set("writer.format", "[{date: HH:mm:ss.SSS}][{uptime}][{thread}][{level}]: {message}")
     val commandLine: CommandLine = new CommandLine(new CLIMain())
     commandLine.execute(args*)
   }
