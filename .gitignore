@@ -158,4 +158,4 @@ fabric.properties
 *.docx#
 
 # maven build outputs
-./SMM-Client-Application/target
+./SMM-Client-Application/target/
