@@ -107,6 +107,7 @@ case class ModpackInstallationRoutine(
     hooks.downloadFile start Some(packFile)
 
     // TODO: resolve file path against root path before downloading!
+    // TODO: use WebClient to download the file.
 
     hooks.downloadFile stop Success(Some(packFile))
   }
