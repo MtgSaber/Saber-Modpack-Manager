@@ -1,11 +1,13 @@
 package net.mtgsaber.smm.client.routines
 
 import net.mtgsaber.smm.client.cli.commands.CLIMain.applicationState
-import net.mtgsaber.smm.client.models.{MCInstallationSpec, MCProfile, ModpackInstallation, PackFile, Mod}
+import net.mtgsaber.smm.client.models.{MCInstallationSpec, MCProfile, Mod, ModpackInstallation, PackFile}
 import net.mtgsaber.smm.client.routines.ModpackInstallationRoutine.ProgressHookDefinition
 import net.mtgsaber.smm.client.state.ApplicationExecutionContextCategories
 import net.mtgsaber.smm.client.state.Tracking.ProgressHook
+import net.mtgsaber.smm.client.util.FileHosts
 
+import java.net.URI
 import java.nio.file.Files
 import scala.None
 import scala.concurrent.*
@@ -108,6 +110,18 @@ case class ModpackInstallationRoutine(
 
     // TODO: resolve file path against root path before downloading!
     // TODO: use WebClient to download the file.
+    val remoteURI = URI.create(packFile.sourceURI)
+    remoteURI.getHost.toLowerCase match {
+      case FileHosts.CurseForge.hostname => {
+        // TODO: handle curseforge mod downloads
+      }
+      case FileHosts.Micdoodle8.hostname => {
+        // TODO: handle micdoodle8 mod downloads
+      }
+      case _ => {
+        // TODO: handle other mod downloads
+      }
+    }
 
     hooks.downloadFile stop Success(Some(packFile))
   }
