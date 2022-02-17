@@ -1,14 +1,21 @@
 package net.mtgsaber.smm.client.routines
 
+import io.netty.channel.ChannelOption
 import net.mtgsaber.smm.client.cli.commands.CLIMain.applicationState
 import net.mtgsaber.smm.client.models.{MCInstallationSpec, MCProfile, Mod, ModpackInstallation, PackFile}
 import net.mtgsaber.smm.client.routines.ModpackInstallationRoutine.ProgressHookDefinition
-import net.mtgsaber.smm.client.state.ApplicationExecutionContextCategories
+import net.mtgsaber.smm.client.state.{ApplicationExecutionContextCategories, ApplicationState}
 import net.mtgsaber.smm.client.state.Tracking.ProgressHook
 import net.mtgsaber.smm.client.util.FileHosts
+import org.springframework.core.io.buffer.{DataBuffer, DataBufferUtils}
+import org.springframework.http.client.reactive.ReactorClientHttpConnector
+import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.WebClient.{RequestBodySpec, RequestHeadersUriSpec}
+import reactor.netty.http.client.HttpClient
 
 import java.net.URI
-import java.nio.file.Files
+import java.nio.file.{Files, Path, StandardOpenOption}
+import java.time.Duration
 import scala.None
 import scala.concurrent.*
 import scala.util.{Success, Try}
@@ -110,10 +117,26 @@ case class ModpackInstallationRoutine(
 
     // TODO: resolve file path against root path before downloading!
     // TODO: use WebClient to download the file.
-    val remoteURI = URI.create(packFile.sourceURI)
+    val remoteURI = URI create packFile.sourceURI
     remoteURI.getHost.toLowerCase match {
       case FileHosts.CurseForge.hostname => {
-        // TODO: handle curseforge mod downloads
+        val y = DataBufferUtils.write(
+          WebClient.builder
+            .clientConnector(new ReactorClientHttpConnector(
+              HttpClient.create
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, ApplicationState.get.applicationConfig.remoteGETTimeoutSeconds)
+                .responseTimeout(Duration.ofMillis(ApplicationState.get.applicationConfig.remoteGETTimeoutSeconds))
+            ))
+            .build
+            .get
+            .uri(remoteURI)
+            .retrieve
+            .bodyToFlux(classOf[DataBuffer]),
+          Path.of(URI create packFile.localPath),
+          StandardOpenOption.CREATE
+        )// TODO: continue this function call chain to track the download progress.
+        // TODO: should also check if the timeout specified earlier will trigger if the download stalls.
+
       }
       case FileHosts.Micdoodle8.hostname => {
         // TODO: handle micdoodle8 mod downloads
