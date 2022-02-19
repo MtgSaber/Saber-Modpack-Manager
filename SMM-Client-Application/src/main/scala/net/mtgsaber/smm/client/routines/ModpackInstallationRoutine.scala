@@ -7,12 +7,15 @@ import net.mtgsaber.smm.client.state.{ApplicationExecutionContextCategories, App
 import net.mtgsaber.smm.client.state.Tracking.ProgressHook
 import net.mtgsaber.smm.client.util.FileHosts
 
+import java.io.FileOutputStream
 import java.net.URI
-import java.nio.file.{Files, Path, StandardOpenOption}
+import java.net.http.HttpResponse.BodyHandlers
+import java.net.http.{HttpClient, HttpRequest}
+import java.nio.file.{Files, Path, Paths, StandardOpenOption}
 import java.time.Duration
 import scala.None
 import scala.concurrent.*
-import scala.util.{Success, Try}
+import scala.util.{Success, Try, Using}
 
 object ModpackInstallationRoutine {
   /**
@@ -112,16 +115,29 @@ case class ModpackInstallationRoutine(
     // TODO: resolve file path against root path before downloading!
     // TODO: use WebClient to download the file.
     val remoteURI = URI create packFile.sourceURI
-    remoteURI.getHost.toLowerCase match {
-      case FileHosts.CurseForge.hostname => {
-        
-
-      }
-      case FileHosts.Micdoodle8.hostname => {
-        // TODO: handle micdoodle8 mod downloads
-      }
-      case _ => {
-        // TODO: handle other mod downloads
+    val result = Using(new FileOutputStream(Paths get packFile.localPath toFile())) { fout =>
+      val handler = BodyHandlers.ofFile(null).
+      remoteURI.getHost.toLowerCase match {
+        case FileHosts.CurseForge.hostname => {
+          HttpClient.newBuilder
+            .version(HttpClient.Version.HTTP_1_1)
+            .connectTimeout(Duration.ofSeconds(30))
+            .build
+            .send(
+              HttpRequest.newBuilder(remoteURI)
+                .version(HttpClient.Version.HTTP_1_1)
+                .timeout(Duration.ofMinutes(15))
+                .GET
+                .build,
+              BodyHandlers.ofByteArrayConsumer()
+            )
+        }
+        case FileHosts.Micdoodle8.hostname => {
+          // TODO: handle micdoodle8 mod downloads
+        }
+        case _ => {
+          // TODO: handle other mod downloads
+        }
       }
     }
 
