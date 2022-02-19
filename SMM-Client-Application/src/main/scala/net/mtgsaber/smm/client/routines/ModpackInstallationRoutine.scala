@@ -5,7 +5,8 @@ import net.mtgsaber.smm.client.models.{MCInstallationSpec, MCProfile, Mod, Modpa
 import net.mtgsaber.smm.client.routines.ModpackInstallationRoutine.ProgressHookDefinition
 import net.mtgsaber.smm.client.state.{ApplicationExecutionContextCategories, ApplicationState}
 import net.mtgsaber.smm.client.state.Tracking.ProgressHook
-import net.mtgsaber.smm.client.util.FileHosts
+import net.mtgsaber.smm.client.util.Http.BodyHandlers
+import net.mtgsaber.smm.client.util.{FileHosts, Http}
 
 import java.io.FileOutputStream
 import java.net.URI
@@ -112,24 +113,22 @@ case class ModpackInstallationRoutine(
   private def downloadFile(packFile: PackFile): Unit = {
     hooks.downloadFile start Some(packFile)
 
-    // TODO: resolve file path against root path before downloading!
-    // TODO: use WebClient to download the file.
     val remoteURI = URI create packFile.sourceURI
-    val result = Using(new FileOutputStream(Paths get packFile.localPath toFile())) { fout =>
-      val handler = BodyHandlers.ofFile(null).
+    // TODO: determine why FileOutputStream is invalid for the Using syntax.
+    val result = Using(new FileOutputStream(packInstallation.root resolve packFile.localPath)) { fout =>
       remoteURI.getHost.toLowerCase match {
         case FileHosts.CurseForge.hostname => {
           HttpClient.newBuilder
             .version(HttpClient.Version.HTTP_1_1)
-            .connectTimeout(Duration.ofSeconds(30))
+            .connectTimeout(Duration.ofSeconds(30)) // TODO: reference the app config for timeouts
             .build
             .send(
               HttpRequest.newBuilder(remoteURI)
                 .version(HttpClient.Version.HTTP_1_1)
-                .timeout(Duration.ofMinutes(15))
+                .timeout(Duration.ofMinutes(15)) // TODO: reference the app config for timeouts
                 .GET
                 .build,
-              BodyHandlers.ofByteArrayConsumer()
+              new Http.BodyHandlers.ByteStreamProgressTracking(fout, hooks.downloadFile progress packFile)
             )
         }
         case FileHosts.Micdoodle8.hostname => {
