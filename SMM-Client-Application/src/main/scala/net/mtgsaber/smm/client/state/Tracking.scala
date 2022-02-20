@@ -1,7 +1,5 @@
 package net.mtgsaber.smm.client.state
 
-import net.mtgsaber.smm.client.routines
-
 import scala.util.Try
 
 object Tracking {
@@ -10,7 +8,7 @@ object Tracking {
    */
   case class ProgressHook[Start, Progress, Stop](
     start: Option[Start] => Unit,
-    progress: (Option[Progress], Option[Double]) => Unit,
+    progress: Option[Progress] => Unit,
     stop: Try[Option[Stop]] => Unit
   )
 }

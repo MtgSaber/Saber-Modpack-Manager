@@ -5,8 +5,9 @@ import net.mtgsaber.smm.client.models.{MCInstallationSpec, MCProfile, Mod, Modpa
 import net.mtgsaber.smm.client.routines.ModpackInstallationRoutine.ProgressHookDefinition
 import net.mtgsaber.smm.client.state.{ApplicationExecutionContextCategories, ApplicationState}
 import net.mtgsaber.smm.client.state.Tracking.ProgressHook
-import net.mtgsaber.smm.client.util.Http.BodyHandlers
-import net.mtgsaber.smm.client.util.{FileHosts, Http}
+import net.mtgsaber.smm.client.util.http.BodyHandlers
+import net.mtgsaber.smm.client.util.FileHosts
+import net.mtgsaber.smm.client.util.http
 
 import java.io.FileOutputStream
 import java.net.URI
@@ -27,7 +28,7 @@ object ModpackInstallationRoutine {
     downloadMods: ProgressHook[Int, (PackFile, Mod), Int],
     downloadConfigs: ProgressHook[Int, (PackFile, Mod, Int), Int],
     downloadOthers: ProgressHook[Int, PackFile, Int],
-    downloadFile: ProgressHook[PackFile, PackFile, PackFile],
+    downloadFile: ProgressHook[PackFile, (PackFile, Long, Long), PackFile],
     injectMCProfile: ProgressHook[String, String, String]
   )
 }
@@ -43,7 +44,8 @@ case class ModpackInstallationRoutine(
   packInstallation: ModpackInstallation,
   hooks: ProgressHookDefinition,
 ) {
-  /* TODO: add mutable fields as necessary to facilitate synchronization and inter-process communication.
+  /*
+   * TODO: add mutable fields as necessary to facilitate synchronization and inter-process communication.
    *       One such communication is the sequential download of files from CurseForge, which forbids
    *       automated concurrent downloads and imposes a delay between automated requests as per
    *       https://www.curseforge.com/robots.txt
@@ -68,7 +70,7 @@ case class ModpackInstallationRoutine(
   /**
    * Downloads all mods for the pack.
    */
-  private def downloadMods(): Unit = {
+  private[this] def downloadMods(): Unit = {
     hooks.downloadMods start packInstallation.modpackVersion.modFiles.size
 
     packInstallation.modpackVersion.modFiles foreach((file, mod) => {
@@ -82,7 +84,7 @@ case class ModpackInstallationRoutine(
   /**
    * Downloads all config files for the pack.
    */
-  private def downloadConfigs(): Unit = {
+  private[this] def downloadConfigs(): Unit = {
     hooks.downloadConfigs start packInstallation.modpackVersion.configFiles.size
 
     // TODO: group map of config files to count number of configs for each mod.
@@ -99,7 +101,7 @@ case class ModpackInstallationRoutine(
   /**
    * Downloads all miscellaneous files for the pack.
    */
-  private def downloadOthers(): Unit = {
+  private[this] def downloadOthers(): Unit = {
 
   }
 
@@ -110,7 +112,7 @@ case class ModpackInstallationRoutine(
    *    mod at a time from it.
    * @param packFile The individual file to download.
    */
-  private def downloadFile(packFile: PackFile): Unit = {
+  private[this] def downloadFile(packFile: PackFile): Unit = {
     hooks.downloadFile start Some(packFile)
 
     val remoteURI = URI create packFile.sourceURI
@@ -128,7 +130,7 @@ case class ModpackInstallationRoutine(
                 .timeout(Duration.ofMinutes(15)) // TODO: reference the app config for timeouts
                 .GET
                 .build,
-              new Http.BodyHandlers.ByteStreamProgressTracking(fout, hooks.downloadFile progress packFile)
+              new http.BodyHandlers.ByteStreamProgressTracking(fout, fileDownloadHookAdapter apply packFile)
             )
         }
         case FileHosts.Micdoodle8.hostname => {
@@ -142,11 +144,15 @@ case class ModpackInstallationRoutine(
 
     hooks.downloadFile stop Success(Some(packFile))
   }
+  
+  private[this] val fileDownloadHookAdapter: (PackFile, Long, Long) => Unit = (packFile, progressBytes, contentLength) => {
+    hooks.downloadFile progress Some((packFile, progressBytes, contentLength))
+  }
 
   /**
    * Adds the profile for this pack into the user's Minecraft Profiles file.
    */
-  private def injectMCProfile(): Unit = {
+  private[this] def injectMCProfile(): Unit = {
     hooks.injectMCProfile start None
 
     hooks.injectMCProfile stop Success(None)
