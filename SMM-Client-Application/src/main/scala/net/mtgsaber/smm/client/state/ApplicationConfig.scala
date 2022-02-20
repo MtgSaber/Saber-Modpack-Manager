@@ -10,8 +10,7 @@ import java.nio.file.Path
  */
 case class ApplicationConfig(
   mcInstallationSpec: MCInstallationSpec,
-  remoteGETTimeoutSeconds: Int,
-  fileHosts: Set[RemoteFileHost]
+  remoteGETTimeoutSeconds: Int
 )
 
 object ApplicationConfig {

@@ -1,9 +1,8 @@
 package net.mtgsaber.smm.client.routines
 
-import net.mtgsaber.smm.client.cli.commands.CLIMain.applicationState
 import net.mtgsaber.smm.client.models.{MCInstallationSpec, MCProfile, Mod, ModpackInstallation, PackFile}
 import net.mtgsaber.smm.client.routines.ModpackInstallationRoutine.ProgressHookDefinition
-import net.mtgsaber.smm.client.state.{ApplicationExecutionContextCategories, ApplicationState}
+import net.mtgsaber.smm.client.state.ApplicationState
 import net.mtgsaber.smm.client.state.Tracking.ProgressHook
 import net.mtgsaber.smm.client.util.http.BodyHandlers
 import net.mtgsaber.smm.client.util.FileHosts
@@ -71,31 +70,31 @@ case class ModpackInstallationRoutine(
    * Downloads all mods for the pack.
    */
   private[this] def downloadMods(): Unit = {
-    hooks.downloadMods start packInstallation.modpackVersion.modFiles.size
+    hooks.downloadMods start Some(packInstallation.modpackVersion.modFiles.size)
 
     packInstallation.modpackVersion.modFiles foreach((file, mod) => {
-      hooks.downloadMods progress (Some (file, mod), None)
+      hooks.downloadMods progress Some(file, mod)
       this downloadFile file
     })
 
-    hooks.downloadMods stop Success(packInstallation.modpackVersion.modFiles.size)
+    hooks.downloadMods stop Success(Some(packInstallation.modpackVersion.modFiles.size))
   }
 
   /**
    * Downloads all config files for the pack.
    */
   private[this] def downloadConfigs(): Unit = {
-    hooks.downloadConfigs start packInstallation.modpackVersion.configFiles.size
+    hooks.downloadConfigs start Some(packInstallation.modpackVersion.configFiles.size)
 
     // TODO: group map of config files to count number of configs for each mod.
     // TODO: use result of grouping in closure below.
 
     packInstallation.modpackVersion.configFiles foreach((file, mod) => {
-      hooks.downloadConfigs progress (Some((file, mod, 1)), None)
+      hooks.downloadConfigs progress Some(file, mod, 1)
       this downloadFile file
     })
 
-    hooks.downloadConfigs stop Success(packInstallation.modpackVersion.configFiles.size)
+    hooks.downloadConfigs stop Success(Some(packInstallation.modpackVersion.configFiles.size))
   }
 
   /**
@@ -117,7 +116,9 @@ case class ModpackInstallationRoutine(
 
     val remoteURI = URI create packFile.sourceURI
     // TODO: determine why FileOutputStream is invalid for the Using syntax.
-    val result = Using(new FileOutputStream(packInstallation.root resolve packFile.localPath)) { fout =>
+    val fout = new FileOutputStream((packInstallation.root resolve packFile.localPath).toFile)
+
+    try {
       remoteURI.getHost.toLowerCase match {
         case FileHosts.CurseForge.hostname => {
           HttpClient.newBuilder
@@ -140,13 +141,16 @@ case class ModpackInstallationRoutine(
           // TODO: handle other mod downloads
         }
       }
+    } finally {
+        fout.close()
     }
 
     hooks.downloadFile stop Success(Some(packFile))
   }
   
-  private[this] val fileDownloadHookAdapter: (PackFile, Long, Long) => Unit = (packFile, progressBytes, contentLength) => {
-    hooks.downloadFile progress Some((packFile, progressBytes, contentLength))
+  private[this] val fileDownloadHookAdapter: PackFile => (Long, Long) => Unit =
+    packFile => (progressBytes, contentLength) => {
+      hooks.downloadFile progress Some((packFile, progressBytes, contentLength))
   }
 
   /**

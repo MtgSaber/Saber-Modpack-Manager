@@ -30,12 +30,12 @@ object BodyHandlers {
   }
 
   case class ByteStreamProgressTracking(
-    outputStream: OutputStream, progressTracker: Option[Double] => Unit
-  ) extends BodyHandler[Path] {
+    outputStream: OutputStream, progressTracker: (Long, Long) => Unit
+  ) extends BodyHandler[Void] {
     override def apply(
       responseInfo: HttpResponse.ResponseInfo
     ): HttpResponse.BodySubscriber[Void] = {
-      val contentLength = responseInfo.headers firstValue "content-length" toOption() getOrElse "-1" toLong()
+      val contentLength = ((responseInfo.headers firstValue "content-length").toOption getOrElse "-1").toLong
       val consumer = new ByteStreamBodyConsumer(contentLength, outputStream, progressTracker)
       HttpResponse.BodyHandlers.ofByteArrayConsumer(
         data => consumer accept data.toOption

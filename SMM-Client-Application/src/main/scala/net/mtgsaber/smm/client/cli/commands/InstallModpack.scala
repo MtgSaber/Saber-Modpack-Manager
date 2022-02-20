@@ -2,7 +2,7 @@ package net.mtgsaber.smm.client.cli.commands
 
 import net.mtgsaber.smm.client.io.RemoteAPI
 import net.mtgsaber.smm.client.state.Tracking.ProgressHook
-import net.mtgsaber.smm.client.models.{Modpack, ModpackInstallation, ModpackVersion, PackFile}
+import net.mtgsaber.smm.client.models.{Author, Mod, Modpack, ModpackInstallation, ModpackVersion, PackFile}
 import net.mtgsaber.smm.client.routines.ModpackInstallationRoutine
 import net.mtgsaber.smm.client.state.ApplicationState
 import org.tinylog.Logger
@@ -67,11 +67,15 @@ object InstallModpack {
       val routine: Future[Int] = Future[ModpackVersion] {
         if modpackVersionID == "latest" then
           RemoteAPI.getPackLatestVersion(
-            Modpack(modpackID), ProgressHooks.APIHooks.getPackLatestVersion, ApplicationState.get
+            modpackID,
+            ProgressHooks.APIHooks.getPackLatestVersion,
+            ApplicationState.get
           )
         else
           RemoteAPI.getPackVersions(
-            Modpack(modpackID), ProgressHooks.APIHooks.getPackVersions, ApplicationState.get
+            modpackID,
+            ProgressHooks.APIHooks.getPackVersions,
+            ApplicationState.get
           ).filter({
             // TODO: implement this. also check usage of futures and see if Try[] wrapping is needed or redundant.
             _.versionID == modpackVersionID
@@ -103,7 +107,7 @@ object InstallModpack {
         start = _ => {
           Logger.info(() => "Beginning installation routine...")
         },
-        progress = (_, _) => {
+        progress = _ => {
 
         },
         stop = _ => {
@@ -111,19 +115,43 @@ object InstallModpack {
         }
       ),
 
-      downloadFiles = ProgressHook[Set[PackFile], PackFile, Set[PackFile]](
+      downloadMods = ProgressHook[Int, (PackFile, Mod), Int](
         start = _ => {
-          Logger.info(() => "Installation routine: Beginning files download process....")
+          Logger.info(() => "Installation routine: Beginning mods download process....")
         },
-        progress = (_, _) => {
+        progress = _ => {
 
         },
         stop = _ => {
-          Logger.info(() => "Installation routine: File downloads complete.")
+          Logger.info(() => "Installation routine: Mod downloads complete.")
         }
       ),
 
-      downloadFile = ProgressHook[PackFile, PackFile, PackFile](
+      downloadConfigs = ProgressHook[Int, (PackFile, Mod, Int), Int](
+        start = _ => {
+          Logger.info(() => "Installation routine: Beginning configs download process....")
+        },
+        progress = _ => {
+
+        },
+        stop = _ => {
+          Logger.info(() => "Installation routine: Config downloads complete.")
+        }
+      ),
+
+      downloadOthers = ProgressHook[Int, PackFile, Int](
+        start = _ => {
+          Logger.info(() => "Installation routine: Beginning other files download process....")
+        },
+        progress = _ => {
+
+        },
+        stop = _ => {
+          Logger.info(() => "Installation routine: Other file downloads complete.")
+        }
+      ),
+
+      downloadFile = ProgressHook[PackFile, (PackFile, Long, Long), PackFile](
         start = (packFile: Option[PackFile]) => {
           Logger.info(
             () => "Installation routine: Begin download \"" + (
@@ -134,21 +162,19 @@ object InstallModpack {
             ) + "\"..."
           )
         },
-        progress = (_, _) => {
+        progress = _ => {
 
         },
-        stop = (result: Try[Option[PackFile]]) => {
-          result match {
-            case Success(value) => {
-              Logger.info(
-                () => "Installation routine: End download \"" + (
-                  value match {
-                    case Some(packFile) => packFile.toString
-                    case None => ""
-                  }
-                  ) + "\""
-              )
-            }
+        stop = {
+          case Success(value) => {
+            Logger.info(
+              () => "Installation routine: End download \"" + (
+                value match {
+                  case Some(packFile) => packFile.toString
+                  case None => ""
+                }
+                ) + "\""
+            )
           }
         }
       ),
@@ -157,7 +183,7 @@ object InstallModpack {
         start = _ => {
           Logger.info(() => "Installation routine: Beginning profile injection...")
         },
-        progress = (_, _) => {
+        progress = _ => {
 
         },
         stop = _ => {
@@ -171,7 +197,7 @@ object InstallModpack {
         start = _ => {
 
         },
-        progress = (_, _) => {
+        progress = _ => {
 
         },
         stop = _ => {
@@ -183,7 +209,7 @@ object InstallModpack {
         start = _ => {
 
         },
-        progress = (_, _) => {
+        progress = _ => {
 
         },
         stop = _ => {
@@ -195,7 +221,7 @@ object InstallModpack {
         start = _ => {
 
         },
-        progress = (_, _) => {
+        progress = _ => {
 
         },
         stop = _ => {
@@ -207,7 +233,7 @@ object InstallModpack {
         start = _ => {
 
         },
-        progress = (_, _) => {
+        progress = _ => {
 
         },
         stop = _ => {
