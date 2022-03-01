@@ -63,7 +63,6 @@ object InstallModpack {
      * Performs the modpack installation process and returns its exit code.
      */
     override def call(): Int = {
-      // TODO: implement
       val routine: Future[Int] = Future[ModpackVersion] {
         if modpackVersionID == "latest" then
           RemoteAPI.getPackLatestVersion(
@@ -77,7 +76,6 @@ object InstallModpack {
             ProgressHooks.APIHooks.getPackVersions,
             ApplicationState.get
           ).filter({
-            // TODO: implement this. also check usage of futures and see if Try[] wrapping is needed or redundant.
             _.versionID == modpackVersionID
           }).head
       } map {
