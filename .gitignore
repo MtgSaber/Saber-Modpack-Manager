@@ -1,3 +1,7 @@
+SMM-WEB-API/HELP.md
+SMM-WEB-API/target/
+!SMM-WEB-API/.mvn/wrapper/maven-wrapper.jar
+
 # Prerequisites
 *.d
 
