@@ -38,18 +38,23 @@
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
-<p>
 The aim of this project is to create a Minecraft modpack management system comparable to the
-<a href="https://www.example.com">FTB</a> and <a href="https://www.example.com">Technic</a>
-launchers. It consists of several sub-systems, including a client program (
-<a href="https://www.example.com">GUI</a> and <a href="https://www.example.com">CLI versions</a>
+[FTB](https://www.feed-the-beast.com/app")
+and
+[Technic](https://www.technicpack.net/)
+launchers.
+It consists of several sub-systems, including a client program (
+[GUI](https://github.com/MtgSaber/Saber-Modpack-Manager/tree/main/SMM-Client-Application)
+and
+[CLI versions](https://github.com/MtgSaber/Saber-Modpack-Manager/tree/main/SMM-Client-Application)
 ) for downloading, installing, and managing their installed modpacks, an
-<a href="https://www.example.com">authentication API</a>
+authentication API
 for users to log in to their SMM accounts, a
-<a href="https://www.example.com">RESTful API</a> for the server functions, and a
-<a href="https://www.example.com">website</a> for modpack documentation, mod help,
-mod author accreditation, and user account management.
-</p>
+[RESTful API](https://github.com/MtgSaber/Saber-Modpack-Manager/tree/main/SMM-Web-API)
+for web service features, and a
+<a href="https://www.example.com">website</a>
+for modpack documentation, mod help, mod author accreditation, and user account management.
+
 
 <!-- BUILT WITH -->
 ### Built With
@@ -57,8 +62,12 @@ This section should list any major frameworks/libraries used to bootstrap your p
 
 * [Java 17](https://www.oracle.com/java/)
 * [Scala 3.1](https://www.scala-lang.org/)
+* [PicoCLI](https://picocli.info/)
 * [JavaFX](https://openjfx.io/)
 * [Gson](https://github.com/google/gson)
+* [Spring](https://spring.io/projects/spring-framework)
+* [Docker](https://www.docker.com/)
+* [MySQL]()
 * [Angular](https://angular.io/)
 * [JQuery](https://jquery.com)
 
@@ -113,12 +122,11 @@ and run the executable jar file. For command line execution, see the
 
 <!-- DEVELOPMENT CYCLES -->
 ## Development Progress
-<p>
 This project is developed using the Scrum methodology, as much as that can be followed by a solo dev.
 Current sprint progress for this project can be watched
-<a href="https://www.example.com">here</a>,
-as well as simply following the sub-branches of the current sprint branch.
-</p>
+[here](https://trello.com/b/DwmO5YBq/scrum-board)
+, as well as simply following the sub-branches of the current sprint branch.
+
 
 <!-- BRANCHING STRATEGY -->
 ### Branching Strategy
@@ -142,32 +150,32 @@ the original branching strategies mentioned earlier.
 ## Roadmap
 
 - [ ] ___Alpha release___
-  - [ ] Mod download mechanism
+  - [x] Mod download mechanism
   - [ ] Launcher Profile manipulation mechanism
-  - [ ] Primary API architecture, design, and skeleton
-  - [ ] Primary API database tables
-  - [ ] Primary API pack download tables endpoints
-  - [ ] Client application architecture
+  - [ ] Feature Web API architecture, design, and skeleton
+  - [ ] Feature Web API database tables
+  - [ ] Feature Web API pack download tables endpoints
+  - [x] Client application architecture
   - [ ] Client launch mechanism
-  - [ ] Client application logic implementation
-  - [ ] Client CLI mode
+  - [x] Client application logic implementation
+  - [ ] Client CLI program
 
 - [ ] __Alpha update__
   - [ ] Authentication API architecture, design, skeleton
   - [ ] Authentication API implementation and testing
-  - [ ] Primary API authentication integration
-  - [ ] Primary API Client VCS endpoints
+  - [ ] Feature Web API authentication integration
+  - [ ] Feature Web API Client VCS endpoints
   - [ ] Website architecture, design, and skeleton
   - [ ] Website landing page & login implemented
   - [ ] Website client download & documentation pages
   - [ ] Client self-update & login features implemented
 
 - [ ] __Alpha update__
-  - [ ] Primary API pack VCS endpoints
-  - [ ] Primary API pack update & details manipulation endpoints
-  - [ ] Primary API author accreditation endpoints
-  - [ ] Primary API public server registration endpoints
-  - [ ] Primary API new endpoints testing
+  - [ ] Feature Web API pack VCS endpoints
+  - [ ] Feature Web API pack update & details manipulation endpoints
+  - [ ] Feature Web API author accreditation endpoints
+  - [ ] Feature Web API public server registration endpoints
+  - [ ] Feature Web API new endpoints testing
   - [ ] Website pack update page
   - [ ] Website author accreditation page template
   - [ ] Website public server registration form & pages
@@ -210,6 +218,8 @@ assisted with my learning, helped me find answers to my questions, helped me to 
 or inspired me in some way regarding the project.
 </p>
 
+* [Baeldung](https://www.baeldung.com/)
+* [CLIG](https://clig.dev/)
 * [Choose an Open Source License](https://choosealicense.com)
 * [Best README Template](https://github.com/othneildrew/Best-README-Template)
 * [Img Shields](https://shields.io)
@@ -218,6 +228,7 @@ or inspired me in some way regarding the project.
 * [Scala plugin for IntelliJ IDEA](https://plugins.jetbrains.com/plugin/1347-scala)
 * [String Manipulation plugin for IntelliJ IDEA](https://plugins.jetbrains.com/plugin/2162-string-manipulation)
 * [GitHub Desktop App](https://desktop.github.com/)
+* [GitKraken](https://www.gitkraken.com/)
 * [Trello](https://trello.com)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
