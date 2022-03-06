@@ -50,7 +50,7 @@ and
 ) for downloading, installing, and managing their installed modpacks, an
 authentication API
 for users to log in to their SMM accounts, a
-[RESTful API](https://github.com/MtgSaber/Saber-Modpack-Manager/tree/main/SMM-Web-API)
+[REST API](https://github.com/MtgSaber/Saber-Modpack-Manager/tree/main/SMM-Web-API)
 for web service features, and a
 <a href="https://www.example.com">website</a>
 for modpack documentation, mod help, mod author accreditation, and user account management.
