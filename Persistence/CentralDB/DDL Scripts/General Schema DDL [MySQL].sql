@@ -7,7 +7,7 @@ CREATE TABLE `Modpack_Access_Permission` (
 CREATE TABLE `User` (
   `id` int PRIMARY KEY,
   `person_id` int UNIQUE,
-  `username` varchar(255) UNIQUE NOT NULL
+  `username` varchar(31) UNIQUE NOT NULL
 );
 
 CREATE TABLE `Person` (
@@ -16,7 +16,7 @@ CREATE TABLE `Person` (
 
 CREATE TABLE `Minecraft_Version` (
   `id` int PRIMARY KEY,
-  `version` char(10) UNIQUE,
+  `version` varchar(31) UNIQUE,
   `title` varchar(255)
 );
 
@@ -30,7 +30,7 @@ CREATE TABLE `Modpack` (
 CREATE TABLE `Modpack_Contribution` (
   `modpack_id` int NOT NULL,
   `contributor_id` int NOT NULL,
-  `role` varchar(255) NOT NULL,
+  `role` varchar(63) NOT NULL,
   PRIMARY KEY (`modpack_id`, `contributor_id`)
 );
 
